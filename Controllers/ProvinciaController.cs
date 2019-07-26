@@ -42,10 +42,17 @@ namespace PaisesAPI.Controllers
         }
 
         // PUT: api/Pais/{PaisId}/Provincia/5
+        /* Body json:
+          {
+                "id": 5,
+                "nombre": "Magallanes_edit",
+                "paisId": 1
+           }
+         */
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProvincia(int id, Provincia provincia)
+        public async Task<IActionResult> PutProvincia(int id, Provincia provincia, int paisId)
         {
-            if (id != provincia.Id)
+            if (id != provincia.Id || paisId != provincia.PaisId)
             {
                 return BadRequest();
             }
@@ -68,26 +75,38 @@ namespace PaisesAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(provincia);
         }
 
         // POST: api/Pais/{PaisId}/Provincia
+        /* Body json:
+         {
+               "nombre": "Magallanes_new",
+         }
+        */
         [HttpPost]
         public async Task<ActionResult<Provincia>> PostProvincia(Provincia provincia, int PaisId)
         {
             provincia.PaisId = PaisId;
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             _context.Provincias.Add(provincia);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProvincia", new { id = provincia.Id }, provincia);
+            //return CreatedAtAction("GetProvincia", new { id = provincia.Id }, provincia);
+            return new CreatedAtRouteResult("GetProvincia", new { id = provincia.Id }, provincia);
         }
 
-        // DELETE: api/Provincia/5
+        // DELETE: api/Pais/{PaisId}/Provincia/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Provincia>> DeleteProvincia(int id)
+        public async Task<ActionResult<Provincia>> DeleteProvincia(int id, int paisId)
         {
             var provincia = await _context.Provincias.FindAsync(id);
-            if (provincia == null)
+            if (provincia == null || provincia.PaisId != paisId)
             {
                 return NotFound();
             }
