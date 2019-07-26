@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +28,12 @@ namespace PaisesAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("db"));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("dockerConnection")));
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(ConfigureJson);
         }
 
@@ -52,24 +58,24 @@ namespace PaisesAPI
             app.UseHttpsRedirection();
             app.UseMvc();
 
-            if (!context.Paises.Any())
-            {
-                context.Paises.AddRange(new List<Pais>()
-                {
-                    new Pais(){Nombre = "Chile", Provincias = new List<Provincia>(){
-                            new Provincia(){Nombre = "Santiago" },
-                            new Provincia(){Nombre = "Concepción"}
-                        }
-                    },
-                    new Pais(){Nombre = "Peru", Provincias = new List<Provincia>(){
-                            new Provincia(){Nombre = "Cusco" },
-                            new Provincia(){Nombre = "Arequipa"}
-                        }
-                    },
-                    new Pais(){Nombre = "Argentina"}
-                });
-                context.SaveChanges();
-            }
+            //if (!context.Paises.Any())
+            //{
+            //    context.Paises.AddRange(new List<Pais>()
+            //    {
+            //        new Pais(){Nombre = "Chile", Provincias = new List<Provincia>(){
+            //                new Provincia(){Nombre = "Santiago" },
+            //                new Provincia(){Nombre = "Concepción"}
+            //            }
+            //        },
+            //        new Pais(){Nombre = "Peru", Provincias = new List<Provincia>(){
+            //                new Provincia(){Nombre = "Cusco" },
+            //                new Provincia(){Nombre = "Arequipa"}
+            //            }
+            //        },
+            //        new Pais(){Nombre = "Argentina"}
+            //    });
+            //    context.SaveChanges();
+            //}
         }
     }
 }
